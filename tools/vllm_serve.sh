@@ -1,0 +1,1 @@
+vllm serve Qwen/Qwen3.5-27B --port 8000 --tensor-parallel-size 8 --max-model-len 262144 --reasoning-parser qwen3
