@@ -1,21 +1,44 @@
-# SVFSearch-code
+# SVFSearch
 
-> 中文文档（当前） | [English Version](README_EN.md)
+<div align="center">
 
-SVFSearch 的推理与评测代码仓库，当前提供三条主运行路径：
+[🌐 项目主页](https://svfsearch.github.io/SVFSearch-page/) &nbsp;·&nbsp; [🤗 数据集](https://huggingface.co/datasets/svfsearch/SVFSearchData) &nbsp;·&nbsp; [English](README.md)
 
-- `run_agent.py`：Plan-Act-Replan 智能体（动态工具选择）
-- `run_workflow.py`：固定流程基线（`img_ann -> query vote -> text_ann -> answer`）
-- `run_direct_qa.py`：不依赖外部检索服务的直接问答基线
+</div>
+
+---
+
+本仓库包含 **SVFSearch** 的推理与评测代码——一个具备动态工具选择能力的多模态检索增强问答系统。当前提供三条主运行路径：
+
+- **`run_agent.py`** — Plan-Act-Replan 智能体（动态工具选择）
+- **`run_workflow.py`** — 固定流程基线（`img_ann → query vote → text_ann → answer`）
+- **`run_direct_qa.py`** — 不依赖外部检索服务的直接问答基线
+
+---
+
+## 目录
+
+1. [核心入口](#1-核心入口)
+2. [项目结构](#2-项目结构)
+3. [环境要求](#3-环境要求)
+4. [服务与默认端口](#4-服务与默认端口)
+5. [快速开始](#5-快速开始)
+6. [输入数据格式](#6-输入数据格式)
+7. [运行评测](#7-运行评测)
+8. [批量多模型评测](#8-批量多模型评测)
+9. [输出文件](#9-输出文件)
+10. [关键环境变量](#10-关键环境变量)
+11. [机制说明](#11-机制说明)
+12. [常见问题](#12-常见问题)
 
 ---
 
 ## 1. 核心入口
 
 | 入口文件 | 作用 | 适用场景 |
-|---|---|---|
+| :--- | :--- | :--- |
 | `run_agent.py` | 动态规划 + 多工具调用 | 主评测流程 |
-| `run_workflow.py` | 固定4步工作流 | 稳定对照基线 |
+| `run_workflow.py` | 固定工作流 | 稳定对照基线 |
 | `run_direct_qa.py` | 仅模型直接作答 | 无检索快速基线 |
 | `run_benchmark.sh` | 多模型批量评测脚本 | 批处理实验 |
 
@@ -53,17 +76,15 @@ SVFSearch 的推理与评测代码仓库，当前提供三条主运行路径：
 
 ## 3. 环境要求
 
-- 推荐 Python `3.10`
+- Python `3.10`（推荐）
 - Linux + NVIDIA GPU（vLLM 与 embedding 服务默认 GPU 推理）
 - 已正确安装 CUDA / PyTorch / vLLM
-
-安装依赖：
 
 ```bash
 pip install -r requirements.txt
 ```
 
-> 注意：`requirements.txt` 中可能包含机器相关 wheel 路径（例如本地构建路径）。如与你当前环境不一致，请替换为你本机可用版本。
+> **注意：** `requirements.txt` 中可能包含机器相关 wheel 路径（例如本地构建路径）。如与当前环境不一致，请替换为你本机可用版本。
 
 ---
 
@@ -72,7 +93,7 @@ pip install -r requirements.txt
 默认配置位于 `qa_agent/config.py`。
 
 | 服务 | 默认地址 | 说明 |
-|---|---|---|
+| :--- | :--- | :--- |
 | LLM API | `http://127.0.0.1:8000/v1` | OpenAI 兼容接口 |
 | `img_ann` | `http://127.0.0.1:8001/img_ann` | 图像召回 |
 | `kn_lookup` | `http://127.0.0.1:8002/kn_lookup` | 知识补全 |
@@ -90,7 +111,7 @@ pip install -r requirements.txt
 vllm serve <YOUR_VLM_MODEL> --host 0.0.0.0 --port 8000
 ```
 
-或参考：
+或参考辅助脚本：
 
 ```bash
 bash tools/vllm_serve.sh
@@ -98,7 +119,7 @@ bash tools/vllm_serve.sh
 
 ### 5.2 启动 ANN / 知识服务
 
-`text_ann`：
+**`text_ann`**
 
 ```bash
 export TEXT_EMB_MODEL_PATH=/path/to/text-embedding-model
@@ -106,7 +127,7 @@ export TEXT_ANN_PATH=/path/to/text_ann_corpus.jsonl
 python tools/text_emb_server.py
 ```
 
-`img_ann`：
+**`img_ann`**
 
 ```bash
 export IMG_EMB_MODEL_PATH=/path/to/image-backbone
@@ -115,7 +136,7 @@ export IMG_ANN_PATH=/path/to/image_ann_pool.jsonl
 python tools/img_emb_server.py
 ```
 
-`multimodal_ann`：
+**`multimodal_ann`**
 
 ```bash
 export MULTIMODAL_EMB_MODEL_PATH=/path/to/multimodal-embedding-model
@@ -123,7 +144,7 @@ export MULTIMODAL_ANN_PATH=/path/to/query_multimodal.final.jsonl
 python tools/multimodal_emb_server.py
 ```
 
-`kn_lookup`：
+**`kn_lookup`**
 
 ```bash
 python tools/kn_lookup_server.py
@@ -135,7 +156,7 @@ python tools/kn_lookup_server.py
 KN_FILES=/path/a.jsonl:/path/b.jsonl python tools/kn_lookup_server.py
 ```
 
-`bm25_ann`（可选）：
+**`bm25_ann`**（可选）
 
 ```bash
 export BM25_DATA_PATH=/path/to/corpus.jsonl
@@ -146,24 +167,25 @@ python tools/bm25_server.py
 
 ## 6. 输入数据格式
 
-`run_agent.py` / `run_workflow.py` / `run_direct_qa.py` 的输入为 JSONL，每行结构如下：
+三条入口均接受 JSONL 格式输入，每行结构如下：
 
 ```json
 {
-  "query": "可选字段，direct_qa --use_kn 时会用",
+  "query": "可选字段，direct_qa --use_kn 时会用到",
   "img": "/path/to/image.jpg",
   "qa": {
     "question": "题目",
     "options": ["选项A", "选项B", "选项C", "选项D"],
-    "answer": "A"
+    "answer": "选项A"
   }
 }
 ```
 
-建议：
+> **建议：**
+> - `qa.answer` 使用 `A/B/C/D` 或完整选项文本均可。
+> - 通常建议显式传 `--input`，避免依赖默认路径。
 
-- `qa.answer` 使用 `A/B/C/D` 或完整选项文本均可。
-- 若使用默认输入参数，请确认文件真实存在；通常建议显式传 `--input`。
+基准数据集已发布于 [🤗 SVFSearchData](https://huggingface.co/datasets/svfsearch/SVFSearchData)。
 
 ---
 
@@ -212,9 +234,8 @@ python run_direct_qa.py \
 ```
 
 可选 `--use_kn`：
-
-- 会读取当前工作目录下 `query_rag_kn_part_1.jsonl` 与 `qwen_rag_kn_part_2.jsonl`
-- 若这两个文件不在当前目录，请调整脚本或建立软链接
+- 会读取当前工作目录下 `query_rag_kn_part_1.jsonl` 与 `qwen_rag_kn_part_2.jsonl`。
+- 若这两个文件不在当前目录，请调整脚本或建立软链接。
 
 ---
 
@@ -226,29 +247,32 @@ python run_direct_qa.py \
 2. 运行 `run_agent.py` 或 `run_workflow.py`
 3. 关闭 vLLM 并清理 GPU 进程
 
-示例：
-
 ```bash
+# 使用 agent 流程
 RUNNER=agent INPUT_PATH=/path/to/benchmark.jsonl bash run_benchmark.sh
+
+# 使用 workflow 流程
 RUNNER=workflow INPUT_PATH=/path/to/benchmark.jsonl bash run_benchmark.sh
+
+# 演习模式（不实际执行）
 DRY_RUN=1 bash run_benchmark.sh
 ```
 
-执行前请先修改 `run_benchmark.sh` 中与你机器相关的配置：
+执行前请先修改 `run_benchmark.sh` 中与机器相关的配置：
 
-- `MODELS`（模型名、TP、显存占比）
-- `INPUT_PATH`（默认可能不是你当前数据）
-- `CUDA_VISIBLE_DEVICES`（GPU 实际拓扑）
+- `MODELS` — 模型名、TP 大小、显存占比
+- `INPUT_PATH` — 默认路径可能与你的数据集不匹配
+- `CUDA_VISIBLE_DEVICES` — 按实际 GPU 拓扑调整
 
 ---
 
 ## 9. 输出文件
 
 | 文件 | 内容 |
-|---|---|
+| :--- | :--- |
 | `predictions.jsonl` | 精简预测结果 |
-| `answer_sheet.jsonl` | 调试详情（route/evidence/trace/raw_output） |
-| `stats.json` | 汇总指标（accuracy、工具调用、时延等） |
+| `answer_sheet.jsonl` | 调试详情（`route` / `evidence` / `trace` / `raw_output`） |
+| `stats.json` | 汇总指标（accuracy、工具调用次数、时延等） |
 | `run.log` | 运行日志（已过滤 base64 图像大字段） |
 
 ---
@@ -257,13 +281,15 @@ DRY_RUN=1 bash run_benchmark.sh
 
 常见变量（详见 `qa_agent/config.py`）：
 
-- `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL`
-- `TEXT_ANN_URL`, `IMG_ANN_URL`, `MULTIMODAL_ANN_URL`, `BM25_ANN_URL`
-- `ANN_TOPK`, `ANN_TIMEOUT`
-- `MAX_PLAN_ROUNDS`, `PLAN_MAX_ATTEMPTS`, `ANSWER_MAX_ATTEMPTS`
-- `KN_LOOKUP_URL`, `KN_LOOKUP_TIMEOUT`
-- `IMG_ANN_KN_TOP_QUERIES`, `IMG_ANN_KN_SELECT_MODE` (`majority` / `llm`)
-- `DEBUG`
+| 变量 | 说明 |
+| :--- | :--- |
+| `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL` | LLM 服务配置 |
+| `TEXT_ANN_URL`, `IMG_ANN_URL`, `MULTIMODAL_ANN_URL`, `BM25_ANN_URL` | ANN 服务地址 |
+| `ANN_TOPK`, `ANN_TIMEOUT` | 检索参数 |
+| `MAX_PLAN_ROUNDS`, `PLAN_MAX_ATTEMPTS`, `ANSWER_MAX_ATTEMPTS` | 智能体循环上限 |
+| `KN_LOOKUP_URL`, `KN_LOOKUP_TIMEOUT` | 知识查询服务 |
+| `IMG_ANN_KN_TOP_QUERIES`, `IMG_ANN_KN_SELECT_MODE` | `majority` 或 `llm` |
+| `DEBUG` | 开启详细调试输出 |
 
 ---
 
@@ -277,7 +303,9 @@ DRY_RUN=1 bash run_benchmark.sh
 
 ## 12. 常见问题
 
-- `FileNotFoundError: data/benckmark.jsonl`：请显式传 `--input` 并确认路径。
-- vLLM 健康检查失败：检查 `--llm-base-url` 是否与服务端口一致。
-- ANN 返回空：优先确认对应服务是否启动、索引文件路径是否正确。
-- 依赖安装失败：优先处理 `requirements.txt` 中与你机器不兼容的本地 wheel 项。
+| 问题 | 解决方案 |
+| :--- | :--- |
+| `FileNotFoundError: data/benckmark.jsonl` | 显式传 `--input` 并确认文件路径。 |
+| vLLM 健康检查失败 | 确认 `--llm-base-url` 与服务端口是否一致。 |
+| ANN 返回空结果 | 确认对应服务已启动，索引文件路径是否正确。 |
+| 依赖安装失败 | 替换 `requirements.txt` 中与当前机器不兼容的本地 wheel 项。 |

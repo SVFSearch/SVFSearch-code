@@ -1,19 +1,42 @@
-# SVFSearch-code
+# SVFSearch
 
-> [中文文档](README_CN.md) | English Documentation (current)
+<div align="center">
 
-This repository contains the inference and evaluation code for SVFSearch, with three runnable entry points:
+[🌐 Project Page](https://svfsearch.github.io/SVFSearch-page/) &nbsp;·&nbsp; [🤗 Dataset](https://huggingface.co/datasets/svfsearch/SVFSearchData) &nbsp;·&nbsp; [中文文档](README_CN.md)
 
-- `run_agent.py`: Plan-Act-Replan agent (dynamic tool routing)
-- `run_workflow.py`: fixed baseline workflow (`img_ann -> query vote -> text_ann -> answer`)
-- `run_direct_qa.py`: direct QA baseline without external retrieval services
+</div>
+
+---
+
+This repository contains the inference and evaluation code for **SVFSearch** — a multimodal retrieval-augmented QA system with dynamic tool routing. Three runnable entry points are provided:
+
+- **`run_agent.py`** — Plan-Act-Replan agent (dynamic tool routing)
+- **`run_workflow.py`** — fixed baseline workflow (`img_ann → query vote → text_ann → answer`)
+- **`run_direct_qa.py`** — direct QA baseline without external retrieval services
+
+---
+
+## Contents
+
+1. [Main Entrypoints](#1-main-entrypoints)
+2. [Repository Layout](#2-repository-layout)
+3. [Requirements](#3-requirements)
+4. [Services and Default Ports](#4-services-and-default-ports)
+5. [Quick Start](#5-quick-start)
+6. [Input Data Format](#6-input-data-format)
+7. [Run Evaluation](#7-run-evaluation)
+8. [Multi-Model Batch Benchmark](#8-multi-model-batch-benchmark)
+9. [Output Files](#9-output-files)
+10. [Key Environment Variables](#10-key-environment-variables)
+11. [Pipeline Notes](#11-pipeline-notes)
+12. [FAQ](#12-faq)
 
 ---
 
 ## 1. Main Entrypoints
 
 | Entry | Purpose | Recommended Use |
-|---|---|---|
+| :--- | :--- | :--- |
 | `run_agent.py` | Dynamic planning + multi-tool retrieval | Primary benchmark pipeline |
 | `run_workflow.py` | Fixed 4-step workflow | Stable baseline comparison |
 | `run_direct_qa.py` | Direct model answering only | Fast no-retrieval baseline |
@@ -53,17 +76,15 @@ This repository contains the inference and evaluation code for SVFSearch, with t
 
 ## 3. Requirements
 
-- Recommended Python `3.10`
+- Python `3.10` (recommended)
 - Linux + NVIDIA GPU (vLLM and embedding services are GPU-first)
-- Proper CUDA / PyTorch / vLLM setup
-
-Install dependencies:
+- CUDA / PyTorch / vLLM properly installed
 
 ```bash
 pip install -r requirements.txt
 ```
 
-> Note: `requirements.txt` may include machine-specific wheel paths (for example local build paths). Replace them with versions compatible with your own environment if needed.
+> **Note:** `requirements.txt` may include machine-specific wheel paths. Replace any incompatible entries with versions that match your own environment.
 
 ---
 
@@ -72,13 +93,13 @@ pip install -r requirements.txt
 Default values are defined in `qa_agent/config.py`.
 
 | Service | Default Endpoint | Description |
-|---|---|---|
+| :--- | :--- | :--- |
 | LLM API | `http://127.0.0.1:8000/v1` | OpenAI-compatible endpoint |
-| `img_ann` | `http://127.0.0.1:8001/img_ann` | image retrieval |
-| `kn_lookup` | `http://127.0.0.1:8002/kn_lookup` | knowledge enrichment |
-| `multimodal_ann` | `http://127.0.0.1:8003/multimodal_ann` | multimodal retrieval |
-| `text_ann` | `http://127.0.0.1:8004/text_ann` | text retrieval |
-| `bm25_ann` | `http://127.0.0.1:8005/bm25_ann` | keyword retrieval |
+| `img_ann` | `http://127.0.0.1:8001/img_ann` | Image retrieval |
+| `kn_lookup` | `http://127.0.0.1:8002/kn_lookup` | Knowledge enrichment |
+| `multimodal_ann` | `http://127.0.0.1:8003/multimodal_ann` | Multimodal retrieval |
+| `text_ann` | `http://127.0.0.1:8004/text_ann` | Text retrieval |
+| `bm25_ann` | `http://127.0.0.1:8005/bm25_ann` | Keyword retrieval |
 
 ---
 
@@ -98,7 +119,7 @@ bash tools/vllm_serve.sh
 
 ### 5.2 Start ANN / Knowledge Services
 
-`text_ann`:
+**`text_ann`**
 
 ```bash
 export TEXT_EMB_MODEL_PATH=/path/to/text-embedding-model
@@ -106,7 +127,7 @@ export TEXT_ANN_PATH=/path/to/text_ann_corpus.jsonl
 python tools/text_emb_server.py
 ```
 
-`img_ann`:
+**`img_ann`**
 
 ```bash
 export IMG_EMB_MODEL_PATH=/path/to/image-backbone
@@ -115,7 +136,7 @@ export IMG_ANN_PATH=/path/to/image_ann_pool.jsonl
 python tools/img_emb_server.py
 ```
 
-`multimodal_ann`:
+**`multimodal_ann`**
 
 ```bash
 export MULTIMODAL_EMB_MODEL_PATH=/path/to/multimodal-embedding-model
@@ -123,7 +144,7 @@ export MULTIMODAL_ANN_PATH=/path/to/query_multimodal.final.jsonl
 python tools/multimodal_emb_server.py
 ```
 
-`kn_lookup`:
+**`kn_lookup`**
 
 ```bash
 python tools/kn_lookup_server.py
@@ -135,7 +156,7 @@ Custom knowledge files:
 KN_FILES=/path/a.jsonl:/path/b.jsonl python tools/kn_lookup_server.py
 ```
 
-`bm25_ann` (optional):
+**`bm25_ann`** (optional)
 
 ```bash
 export BM25_DATA_PATH=/path/to/corpus.jsonl
@@ -146,7 +167,7 @@ python tools/bm25_server.py
 
 ## 6. Input Data Format
 
-`run_agent.py`, `run_workflow.py`, and `run_direct_qa.py` expect JSONL input where each line looks like:
+All three entry points accept JSONL input where each line has the following structure:
 
 ```json
 {
@@ -155,15 +176,16 @@ python tools/bm25_server.py
   "qa": {
     "question": "question text",
     "options": ["option A", "option B", "option C", "option D"],
-    "answer": "A"
+    "answer": "option A"
   }
 }
 ```
 
-Recommendations:
+> **Tips:**
+> - `qa.answer` can be either `A/B/C/D` or the full option text.
+> - Prefer passing `--input` explicitly instead of relying on defaults.
 
-- `qa.answer` can be either `A/B/C/D` or the full option text.
-- Prefer passing `--input` explicitly instead of relying on defaults.
+The benchmark dataset is available at [🤗 SVFSearchData](https://huggingface.co/datasets/svfsearch/SVFSearchData).
 
 ---
 
@@ -212,9 +234,8 @@ python run_direct_qa.py \
 ```
 
 Optional `--use_kn`:
-
-- reads `query_rag_kn_part_1.jsonl` and `qwen_rag_kn_part_2.jsonl` from current working directory
-- if these files are elsewhere, update the script or create symlinks
+- Reads `query_rag_kn_part_1.jsonl` and `qwen_rag_kn_part_2.jsonl` from the current working directory.
+- If these files are elsewhere, update the script or create symlinks.
 
 ---
 
@@ -222,48 +243,53 @@ Optional `--use_kn`:
 
 `run_benchmark.sh` executes each model in `MODELS` sequentially:
 
-1. start vLLM
-2. run `run_agent.py` or `run_workflow.py`
-3. stop vLLM and clean up GPU processes
-
-Examples:
+1. Start vLLM
+2. Run `run_agent.py` or `run_workflow.py`
+3. Stop vLLM and clean up GPU processes
 
 ```bash
+# Run agent pipeline
 RUNNER=agent INPUT_PATH=/path/to/benchmark.jsonl bash run_benchmark.sh
+
+# Run workflow pipeline
 RUNNER=workflow INPUT_PATH=/path/to/benchmark.jsonl bash run_benchmark.sh
+
+# Dry run (no actual execution)
 DRY_RUN=1 bash run_benchmark.sh
 ```
 
-Before running, adjust machine-specific config in `run_benchmark.sh`:
+Before running, adjust the machine-specific config inside `run_benchmark.sh`:
 
-- `MODELS` (model name, TP size, GPU memory ratio)
-- `INPUT_PATH` (default may not match your dataset)
-- `CUDA_VISIBLE_DEVICES` and your real GPU topology
+- `MODELS` — model name, TP size, GPU memory ratio
+- `INPUT_PATH` — default may not match your dataset
+- `CUDA_VISIBLE_DEVICES` — match your actual GPU topology
 
 ---
 
 ## 9. Output Files
 
 | File | Description |
-|---|---|
-| `predictions.jsonl` | compact prediction results |
-| `answer_sheet.jsonl` | debug details (`route/evidence/trace/raw_output`) |
-| `stats.json` | aggregate metrics (accuracy, tool usage, latency, etc.) |
-| `run.log` | runtime logs (base64 image blobs are filtered) |
+| :--- | :--- |
+| `predictions.jsonl` | Compact prediction results |
+| `answer_sheet.jsonl` | Debug details (`route` / `evidence` / `trace` / `raw_output`) |
+| `stats.json` | Aggregate metrics (accuracy, tool usage, latency, etc.) |
+| `run.log` | Runtime logs (base64 image blobs are filtered out) |
 
 ---
 
 ## 10. Key Environment Variables
 
-Common variables (see `qa_agent/config.py` for full list):
+Common variables (see `qa_agent/config.py` for the full list):
 
-- `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL`
-- `TEXT_ANN_URL`, `IMG_ANN_URL`, `MULTIMODAL_ANN_URL`, `BM25_ANN_URL`
-- `ANN_TOPK`, `ANN_TIMEOUT`
-- `MAX_PLAN_ROUNDS`, `PLAN_MAX_ATTEMPTS`, `ANSWER_MAX_ATTEMPTS`
-- `KN_LOOKUP_URL`, `KN_LOOKUP_TIMEOUT`
-- `IMG_ANN_KN_TOP_QUERIES`, `IMG_ANN_KN_SELECT_MODE` (`majority` / `llm`)
-- `DEBUG`
+| Variable | Description |
+| :--- | :--- |
+| `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL` | LLM service configuration |
+| `TEXT_ANN_URL`, `IMG_ANN_URL`, `MULTIMODAL_ANN_URL`, `BM25_ANN_URL` | ANN service endpoints |
+| `ANN_TOPK`, `ANN_TIMEOUT` | Retrieval parameters |
+| `MAX_PLAN_ROUNDS`, `PLAN_MAX_ATTEMPTS`, `ANSWER_MAX_ATTEMPTS` | Agent loop limits |
+| `KN_LOOKUP_URL`, `KN_LOOKUP_TIMEOUT` | Knowledge lookup service |
+| `IMG_ANN_KN_TOP_QUERIES`, `IMG_ANN_KN_SELECT_MODE` | `majority` or `llm` |
+| `DEBUG` | Enable verbose debug output |
 
 ---
 
@@ -277,7 +303,9 @@ Common variables (see `qa_agent/config.py` for full list):
 
 ## 12. FAQ
 
-- `FileNotFoundError: data/benckmark.jsonl`: pass `--input` explicitly and verify the path.
-- vLLM health check failed: verify `--llm-base-url` and service port.
-- Empty ANN results: check whether the service is running and index paths are correct.
-- Dependency installation failure: replace machine-specific wheel entries in `requirements.txt`.
+| Problem | Solution |
+| :--- | :--- |
+| `FileNotFoundError: data/benckmark.jsonl` | Pass `--input` explicitly and verify the path. |
+| vLLM health check failed | Verify `--llm-base-url` matches the service port. |
+| Empty ANN results | Check that the service is running and index paths are correct. |
+| Dependency installation failure | Replace machine-specific wheel entries in `requirements.txt`. |
