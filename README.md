@@ -8,6 +8,11 @@
 
 ---
 
+> **Note:** This repository is the **Plan-Act-Replan Agent** codebase in **SVFSearch**.  
+> For **mmsearch-r1-game** code, see: https://github.com/SVFSearch/SVFSearch-mmsearch-r1-game
+
+---
+
 This repository contains the inference and evaluation code for **SVFSearch** — a multimodal retrieval-augmented QA system with dynamic tool routing. Three runnable entry points are provided:
 
 - **`run_agent.py`** — Plan-Act-Replan agent (dynamic tool routing)

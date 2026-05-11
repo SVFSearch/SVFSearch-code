@@ -8,6 +8,11 @@
 
 ---
 
+> **说明：** 本仓库是 **SVFSearch** 中的 **Plan-Act-Replan Agent** 代码实现。  
+> **mmsearch-r1-game** 代码可参考：https://github.com/SVFSearch/SVFSearch-mmsearch-r1-game
+
+---
+
 本仓库包含 **SVFSearch** 的推理与评测代码——一个具备动态工具选择能力的多模态检索增强问答系统。当前提供三条主运行路径：
 
 - **`run_agent.py`** — Plan-Act-Replan 智能体（动态工具选择）
