@@ -314,3 +314,21 @@ DRY_RUN=1 bash run_benchmark.sh
 | vLLM 健康检查失败 | 确认 `--llm-base-url` 与服务端口是否一致。 |
 | ANN 返回空结果 | 确认对应服务已启动，索引文件路径是否正确。 |
 | 依赖安装失败 | 替换 `requirements.txt` 中与当前机器不兼容的本地 wheel 项。 |
+
+---
+
+## 引用
+
+如果本工作对你有所帮助，请引用我们的论文：
+
+```bibtex
+@misc{mao2026svfsearchmultimodalknowledgeintensivebenchmark,
+      title={SVFSearch: A Multimodal Knowledge-Intensive Benchmark for Short-Video Frame Search in the Gaming Vertical Domain}, 
+      author={Lingtao Mao and Huangyu Dai and Xinyu Sun and Zihan Liang and Ben Chen and Chenyi Lei and Wenwu Ou},
+      year={2026},
+      eprint={2605.17946},
+      archivePrefix={arXiv},
+      primaryClass={cs.AI},
+      url={https://arxiv.org/abs/2605.17946}, 
+}
+```

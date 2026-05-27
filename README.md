@@ -314,3 +314,21 @@ Common variables (see `qa_agent/config.py` for the full list):
 | vLLM health check failed | Verify `--llm-base-url` matches the service port. |
 | Empty ANN results | Check that the service is running and index paths are correct. |
 | Dependency installation failure | Replace machine-specific wheel entries in `requirements.txt`. |
+
+---
+
+## Citation
+
+If you find this work useful, please cite our paper:
+
+```bibtex
+@misc{mao2026svfsearchmultimodalknowledgeintensivebenchmark,
+      title={SVFSearch: A Multimodal Knowledge-Intensive Benchmark for Short-Video Frame Search in the Gaming Vertical Domain}, 
+      author={Lingtao Mao and Huangyu Dai and Xinyu Sun and Zihan Liang and Ben Chen and Chenyi Lei and Wenwu Ou},
+      year={2026},
+      eprint={2605.17946},
+      archivePrefix={arXiv},
+      primaryClass={cs.AI},
+      url={https://arxiv.org/abs/2605.17946}, 
+}
+```
