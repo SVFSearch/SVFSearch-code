@@ -2,7 +2,7 @@
 
 <div align="center">
 
-[🌐 Project Page](https://svfsearch.github.io/SVFSearch-page/) &nbsp;·&nbsp; [🤗 Dataset](https://huggingface.co/datasets/svfsearch/SVFSearchData) &nbsp;·&nbsp; [中文文档](README_CN.md)
+[🌐 Project Page](https://svfsearch.github.io/SVFSearch-page/) &nbsp;·&nbsp; [📄 Paper](https://arxiv.org/abs/2605.17946) &nbsp;·&nbsp; [🤗 Dataset](https://huggingface.co/datasets/svfsearch/SVFSearchData) &nbsp;·&nbsp; [中文文档](README_CN.md)
 
 </div>
 
